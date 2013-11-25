@@ -65,9 +65,10 @@
 
 (let [key-codes { 37 :west 38 :north 39 :east 40 :south }
       keystrokes (listen (chan) (key-handler js/document) "key")]
-  (go (while true 
+  (go (while true
         (let [event (<! keystrokes)]
           ;(.log js/console event)
-          (turn! (key-codes (.-keyCode event)))))))
+          (when-let [new-dir (key-codes (.-keyCode event))]
+            (turn! new-dir))))))
 
 (. js/console (log "Hello world!"))
