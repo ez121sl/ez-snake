@@ -36,13 +36,15 @@
 (defn crawl [{:keys [snake bunny dir w h] :as game}]
   (let [new-head (move (head snake) dir)]
     (cond
-      (= new-head bunny) (-> game
-                           (assoc :snake (grow snake new-head))
-                           (as-> g (assoc g :bunny (place-bunny g)))
-                           (update-in [:score] + 10))
-      (or (ran-into-itself new-head snake)
-          (out-of-bounds new-head w h)) (assoc game :state :lost)
-      :else (-> game
-              (assoc :snake (advance snake new-head))
-              (update-in [:score] inc)))))
+     (= new-head bunny)
+       (-> game
+           (assoc :snake (grow snake new-head))
+           (as-> g (assoc g :bunny (place-bunny g)))
+           (update-in [:score] + 10))
+     (or (ran-into-itself new-head snake) (out-of-bounds new-head w h))
+       (assoc game :state :lost)
+     :else
+       (-> game
+           (assoc :snake (advance snake new-head))
+           (update-in [:score] inc)))))
 

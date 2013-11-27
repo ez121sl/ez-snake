@@ -10,11 +10,11 @@
 
   :source-paths ["src"]
 
-  :cljsbuild { 
+  :cljsbuild {
     :builds [{:id "ez-snake"
               :source-paths ["src"]
               :compiler {
                 :output-to "ez_snake.js"
                 :output-dir "out"
                 :optimizations :none
-                :source-map true}}]})
+                :source-map "ez_snake.js.map"}}]})

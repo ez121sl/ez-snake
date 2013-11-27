@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html>
     <head>
         <meta charset="utf-8">
@@ -6,12 +7,13 @@
 
         <h1>Snake</h1>
         <p>Hiss!</p>
-        <p>Level: 
+        <p>Level:
           <select id="level">
             <option value="1000">1</option>
             <option value="500">2</option>
-            <option value="250">3</option>
-          </select> 
+            <option value="250" selected>3</option>
+          </select>
+          <button id="new-game">New game</button>
           Score: <span id="score">0</span></p>
         <div>
             <canvas id="canvas" width="200" height="100"

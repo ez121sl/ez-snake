@@ -4,7 +4,7 @@
             [goog.events :as events]
             [goog.Timer :as timer]
             [goog.events.KeyHandler :as keyh]
-            [cljs.core.async :refer [put! chan <!]]
+            [cljs.core.async :refer [put! chan <! close!]]
             [ez-snake.game :refer [new-game! crawl! turn! game]]))
 
 (defn listen [ch el type]
@@ -45,30 +45,56 @@
 (defn render-score [game]
   (set! (.-innerHTML (dom/getElement "score")) (:score game)))
 
-(let [ch (chan)]
-  (doseq [id ["east" "west" "north" "south"]]
-    (listen ch (dom/getElement id) "click"))
-  (go (while true
-        (let [event  (<! ch)]
-          ;(.log js/console event)
-          (turn! (keyword (.. event -target -id)))))))
+(defn handle-buttons []
+  (let [ch (chan)]
+    (doseq [id ["east" "west" "north" "south"]]
+      (listen ch (dom/getElement id) "click"))
+    (go (loop []
+          (when-let [event (<! ch)]
+            (turn! (keyword (.. event -target -id)))
+            (recur))))
+    ch))
 
-(let [heartbeats (listen (chan) (beat (level)) goog.Timer/TICK)]
-  (go (while (<! heartbeats)
-        (crawl!)
-        ((juxt
-          render-background
-          render-snake
-          render-bunny
-          render-state
-          render-score) @game))))
+(defn handle-timer []
+  (let [timer (beat (@game :level))
+        heartbeats (listen (chan) timer goog.Timer/TICK)]
+    (go (loop []
+          (if (<! heartbeats)
+            (do
+              (crawl!)
+              ((juxt
+                render-background
+                render-snake
+                render-bunny
+                render-state
+                render-score) @game)
+              (recur))
+            (.stop timer))))
+    heartbeats))
 
-(let [key-codes { 37 :west 38 :north 39 :east 40 :south }
-      keystrokes (listen (chan) (key-handler js/document) "key")]
-  (go (while true
-        (let [event (<! keystrokes)]
-          ;(.log js/console event)
-          (when-let [new-dir (key-codes (.-keyCode event))]
-            (turn! new-dir))))))
+(defn handle-keystrokes []
+  (let [key-codes { 37 :west 38 :north 39 :east 40 :south }
+        keystrokes (listen (chan) (key-handler js/document) "key")]
+    (go (loop []
+          (when-let [event (<! keystrokes)]
+            ;(.log js/console event)
+            (when-let [new-dir (key-codes (.-keyCode event))]
+              (turn! new-dir))
+            (recur))))
+    keystrokes))
+
+(defn stop-round [channels]
+  (doseq [ch channels]
+    (close! ch)))
+
+(defn new-round [channels level]
+  (stop-round channels)
+  (new-game! level)
+  ((juxt handle-buttons handle-keystrokes handle-timer)))
+
+(let [round (atom [])
+      rounds (listen (chan) (dom/getElement "new-game") "click")]
+  (go (while (<! rounds)
+        (swap! round new-round (level)))))
 
 (. js/console (log "Hello world!"))
