@@ -7,13 +7,12 @@
                      :dir :east
                      :bunny [7 5]
                      :state :init
-                     :level 1
                      :score 0 })
 
 (def game (atom initial-state))
 
 (defn new-game! [level]
-  (reset! game (assoc initial-state :level level)))
+  (reset! game initial-state))
 
 (defn crawl! []
   (swap! game crawl))

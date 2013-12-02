@@ -1,5 +1,5 @@
 (ns ez-snake.core
-  (:require-macros [cljs.core.async.macros :refer [go]])
+  (:require-macros [cljs.core.async.macros :refer [go go-loop]])
   (:require [goog.dom :as dom]
             [goog.events :as events]
             [goog.Timer :as timer]
@@ -11,10 +11,11 @@
   (events/listen el type #(put! ch %))
   ch)
 
-(defn beat [timeout]
-  (let [timer (goog.Timer. timeout)]
-    (.start timer)
-    timer))
+(defn beat [timer timeout]
+  (doto timer
+    (.stop)
+    (.setInterval timeout)
+    (.start)))
 
 (defn key-handler [target]
   (let [kh (goog.events.KeyHandler. target)]
@@ -49,17 +50,15 @@
   (let [ch (chan)]
     (doseq [id ["east" "west" "north" "south"]]
       (listen ch (dom/getElement id) "click"))
-    (go (loop []
+    (go-loop []
           (when-let [event (<! ch)]
             (turn! (keyword (.. event -target -id)))
-            (recur))))
-    ch))
+            (recur)))))
 
-(defn handle-timer []
-  (let [timer (beat (@game :level))
-        heartbeats (listen (chan) timer goog.Timer/TICK)]
-    (go (loop []
-          (if (<! heartbeats)
+(defn handle-timer [timer]
+  (let [heartbeats (listen (chan) timer goog.Timer/TICK)]
+    (go-loop []
+          (when (<! heartbeats)
             (do
               (crawl!)
               ((juxt
@@ -68,33 +67,26 @@
                 render-bunny
                 render-state
                 render-score) @game)
-              (recur))
-            (.stop timer))))
-    heartbeats))
+              (recur))))))
 
 (defn handle-keystrokes []
   (let [key-codes { 37 :west 38 :north 39 :east 40 :south }
         keystrokes (listen (chan) (key-handler js/document) "key")]
-    (go (loop []
+    (go-loop []
           (when-let [event (<! keystrokes)]
             ;(.log js/console event)
             (when-let [new-dir (key-codes (.-keyCode event))]
               (turn! new-dir))
-            (recur))))
-    keystrokes))
+            (recur)))))
 
-(defn stop-round [channels]
-  (doseq [ch channels]
-    (close! ch)))
-
-(defn new-round [channels level]
-  (stop-round channels)
+(defn new-round [timer level]
   (new-game! level)
-  ((juxt handle-buttons handle-keystrokes handle-timer)))
+  (beat timer level))
 
-(let [round (atom [])
+(let [timer (goog.Timer.)
       rounds (listen (chan) (dom/getElement "new-game") "click")]
+  ((juxt handle-buttons handle-keystrokes #(handle-timer timer)))
   (go (while (<! rounds)
-        (swap! round new-round (level)))))
+        (new-round timer (level)))))
 
 (. js/console (log "Hello world!"))
