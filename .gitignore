@@ -1,3 +1,7 @@
 out
 *~
 ez_snake.js
+target
+bin
+.project
+.classpath

@@ -17,10 +17,10 @@
 
 (def dir-map { :north :v, :south :v, :east :h, :west :h })
 
-(defn new-dir [old-dir new-dir]
-  (if-not (= (dir-map old-dir) (dir-map new-dir))
-    new-dir
-    old-dir))
+(defn new-dir [{:keys [dir new-dir] :as game} requested-dir]
+  (if-not (= (dir-map dir) (dir-map requested-dir))
+    (assoc game :new-dir requested-dir)
+    game))
 
 (defn place-bunny [{:keys [snake w h]}]
   (let [snake (apply hash-set snake)
@@ -33,18 +33,21 @@
 (defn out-of-bounds [[x y] w h]
   (or (neg? x) (neg? y) (>= x w) (>= y h)))
 
-(defn crawl [{:keys [snake bunny dir w h] :as game}]
-  (let [new-head (move (head snake) dir)]
+(defn crawl [{:keys [snake bunny new-dir w h] :as game}]
+  (let [new-head (move (head snake) new-dir)]
     (cond
      (= new-head bunny)
        (-> game
            (assoc :snake (grow snake new-head))
+           (assoc :dir new-dir)
            (as-> g (assoc g :bunny (place-bunny g)))
-           (update-in [:score] + 10))
+           (update-in [:score] + 10)
+           (update-in [:bunnies-eaten] inc))
      (or (ran-into-itself new-head snake) (out-of-bounds new-head w h))
-       (assoc game :state :lost)
+       (assoc game :lost true)
      :else
-       (-> game
+       (-> game         
            (assoc :snake (advance snake new-head))
+           (assoc :dir new-dir)
            (update-in [:score] inc)))))
 

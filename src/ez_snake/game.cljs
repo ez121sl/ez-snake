@@ -5,9 +5,11 @@
                      :h 10
                      :snake '([5 5] [4 5] [3 5])
                      :dir :east
+                     :new-dir :east
                      :bunny [7 5]
-                     :state :init
-                     :score 0 })
+                     :lost false
+                     :score 0 
+                     :bunnies-eaten 0 })
 
 (def game (atom initial-state))
 
@@ -18,6 +20,5 @@
   (swap! game crawl))
 
 (defn turn! [key]
-  (swap! game update-in [:dir] new-dir key))
-
+  (swap! game new-dir key))
 

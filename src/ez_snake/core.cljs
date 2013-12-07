@@ -1,6 +1,7 @@
 (ns ez-snake.core
   (:require-macros [cljs.core.async.macros :refer [go go-loop]])
   (:require [goog.dom :as dom]
+            [goog.style :as style]
             [goog.events :as events]
             [goog.Timer :as timer]
             [goog.events.KeyHandler :as keyh]
@@ -18,8 +19,7 @@
     (.start)))
 
 (defn key-handler [target]
-  (let [kh (goog.events.KeyHandler. target)]
-    kh))
+  (goog.events.KeyHandler. target))
 
 (defn level []
   (.-value (dom/getElement "level")))
@@ -46,6 +46,9 @@
 (defn render-score [game]
   (set! (.-innerHTML (dom/getElement "score")) (:score game)))
 
+(defn render-game-over [{:keys [lost]}]
+  (style/showElement (dom/getElement "game-over") lost))
+
 (defn handle-buttons []
   (let [ch (chan)]
     (doseq [id ["east" "west" "north" "south"]]
@@ -58,16 +61,18 @@
 (defn handle-timer [timer]
   (let [heartbeats (listen (chan) timer goog.Timer/TICK)]
     (go-loop []
-          (when (<! heartbeats)
-            (do
-              (crawl!)
-              ((juxt
-                render-background
-                render-snake
-                render-bunny
-                render-state
-                render-score) @game)
-              (recur))))))
+             (when (<! heartbeats)
+               (crawl!)
+               ((juxt
+                 render-background
+                 render-snake
+                 render-bunny
+                 render-state
+                 render-score
+                 render-game-over) @game)
+               (when (:lost @game)
+                 (.stop timer))
+               (recur)))))
 
 (defn handle-keystrokes []
   (let [key-codes { 37 :west 38 :north 39 :east 40 :south }
