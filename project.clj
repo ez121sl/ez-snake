@@ -1,4 +1,4 @@
-(defproject ez-snake "0.1.0-SNAPSHOT"
+(defproject ez-snake "0.2.0-SNAPSHOT"
   :description "Snake game"
   :url "https://bitbucket.org/ezaretsky/ez-snake"
   
