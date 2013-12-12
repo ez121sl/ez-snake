@@ -51,10 +51,12 @@
 
 (defn handle-buttons []
   (let [ch (chan)]
-    (doseq [id ["east" "west" "north" "south"]]
-      (listen ch (dom/getElement id) "click"))
+    (doseq [id ["east" "west" "north" "south"]
+            evt ["mousedown"]]
+      (listen ch (dom/getElement id) evt))
     (go-loop []
           (when-let [event (<! ch)]
+            ;(.log js/console event)
             (turn! (keyword (.. event -target -id)))
             (recur)))))
 
