@@ -1,5 +1,5 @@
 (defproject ez-snake "0.2.0-SNAPSHOT"
-  :description "Snake game"
+  :description "Snake game - experiments with ClojureScript"
   :url "https://bitbucket.org/ezaretsky/ez-snake"
   
   :dependencies [[org.clojure/clojure "1.5.1"]
