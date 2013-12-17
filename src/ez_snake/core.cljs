@@ -1,12 +1,12 @@
 (ns ez-snake.core
-  (:require-macros [cljs.core.async.macros :refer [go go-loop]])
   (:require [goog.dom :as dom]
             [goog.style :as style]
             [goog.events :as events]
-            [goog.Timer :as timer]
-            [goog.events.KeyHandler :as keyh]
             [cljs.core.async :refer [put! chan <! close!]]
-            [ez-snake.game :refer [new-game! crawl! turn! game]]))
+            [ez-snake.game :refer [new-game! crawl! turn! game]])
+  (:require-macros [cljs.core.async.macros :refer [go go-loop]])
+  (:import goog.Timer
+           goog.events.KeyHandler))
 
 (defn listen [ch el type]
   (events/listen el type #(put! ch %))
@@ -19,7 +19,7 @@
     (.start)))
 
 (defn key-handler [target]
-  (goog.events.KeyHandler. target))
+  (KeyHandler. target))
 
 (defn level []
   (.-value (dom/getElement "level")))
@@ -90,7 +90,7 @@
   (new-game! level)
   (beat timer level))
 
-(let [timer (goog.Timer.)
+(let [timer (Timer.)
       rounds (listen (chan) (dom/getElement "new-game") "click")]
   ((juxt handle-buttons handle-keystrokes #(handle-timer timer)))
   (go (while (<! rounds)
