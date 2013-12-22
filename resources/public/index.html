@@ -2,6 +2,25 @@
 <html>
     <head>
         <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, user-scalable=no">
+        <style>
+          button.thumb {
+            height: 72px;
+            width: 72px;
+          }
+          table {
+            margin-left: auto;
+            margin-right: auto;
+          }
+          body {
+            margin: auto;
+            width: 340px;
+            background-image:url('images/snake.png');
+            background-repeat:no-repeat;
+            background-attachment:fixed;
+            background-position:center top; 
+          }
+        </style>
     </head>
     <body>
 
@@ -16,23 +35,22 @@
           <button id="new-game">New game</button>
           Score: <span id="score">0</span></p>
         <div>
-            <canvas id="canvas" width="200" height="100"
+            <canvas id="canvas" width="340" height="170"
                     style="border:1px solid #000000;"></canvas>
-            <img src="images/snake.png" alt="snake">
         </div>
 
-        <div>
+        <div id="controls">
             <table>
                 <tbody>
-                    <tr><td></td><td><button id="north">&uarr;</button></td><td></td></tr>
-                    <tr><td><button id="west">&larr;</button></td><td></td><td><button id="east">&rarr;</button></td></tr>
-                    <tr><td></td><td><button id="south">&darr;</button></td><td></td></tr>
+                    <tr><td></td><td><button id="north" class="thumb">&uarr;</button></td><td></td></tr>
+                    <tr><td><button id="west" class="thumb">&larr;</button></td><td></td><td><button id="east" class="thumb">&rarr;</button></td></tr>
+                    <tr><td></td><td><button id="south" class="thumb">&darr;</button></td><td></td></tr>
                 </tbody>
             </table>
         </div>
 
         <h2 id="game-over" style="display: none;">Game Over!</h2>
-        <p id="snake"></p>
+        <p id="snake" style="display: none;"></p>
 
         <!-- script src="dev-js/goog/base.js" type="text/javascript"></script>
         <script src="dev-js/ez_snake.js" type="text/javascript"></script>

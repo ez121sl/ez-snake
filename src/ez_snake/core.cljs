@@ -26,9 +26,9 @@
 
 (def *ctx* (.getContext (dom/getElement "canvas") "2d"))
 
-(defn render-background [_]
+(defn render-background [{:keys [w h]}]
   (set! (.-fillStyle *ctx*) "white")
-  (.fillRect *ctx* 0 0 200 100))
+  (.fillRect *ctx* 0 0 (* w 10) (* h 10)))
 
 (defn render-snake [{:keys [snake] :as game}]
   (set! (.-fillStyle *ctx*) "green")
@@ -47,12 +47,13 @@
   (set! (.-innerHTML (dom/getElement "score")) (:score game)))
 
 (defn render-game-over [{:keys [lost]}]
-  (style/showElement (dom/getElement "game-over") lost))
+  (style/showElement (dom/getElement "game-over") lost)
+  (style/showElement (dom/getElement "controls") (not lost)))
 
 (defn handle-buttons []
   (let [ch (chan)]
     (doseq [id ["east" "west" "north" "south"]
-            evt ["mousedown"]]
+            evt ["click"]]
       (listen ch (dom/getElement id) evt))
     (go-loop []
           (when-let [event (<! ch)]

@@ -1,8 +1,8 @@
 (ns ez-snake.game
   (:require [ez-snake.snake :refer [crawl new-dir]]))
 
-(def initial-state { :w 20,
-                     :h 10
+(def initial-state { :w 34,
+                     :h 17
                      :snake '([5 5] [4 5] [3 5])
                      :dir :east
                      :new-dir :east
