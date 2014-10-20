@@ -1,4 +1,4 @@
-ez-tetris
+ez-snake
 =========
 
 Snake-like game for Rachel
