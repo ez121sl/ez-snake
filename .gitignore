@@ -5,3 +5,4 @@ target
 bin
 .project
 .classpath
+.lein-repl-history
